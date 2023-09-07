@@ -6,7 +6,8 @@ namespace devopsindepth.Controllers;
 
 public class MyString
 {
-    public string textString { get; set; }
+    public string me { get; set; }
+    public string assistant {get; set; }
 }
 
 [ApiController]
@@ -19,6 +20,7 @@ public class WeatherForecastController : ControllerBase
     };
 
     private readonly ILogger<WeatherForecastController> _logger;
+    static List<MyString> myMessages = new List<MyString>();
     static ChatCompletionsOptions chatComplete = new ChatCompletionsOptions
     {
         Messages =
@@ -51,7 +53,7 @@ Lunch"),
         new Uri("https://gpt-devlin.openai.azure.com/"),
         new AzureKeyCredential("f501038bd9334d15941f1c224c39514a"));
 
-        chatComplete.Messages.Add(new ChatMessage(ChatRole.User, data.textString));
+        chatComplete.Messages.Add(new ChatMessage(ChatRole.User, data.me));
 
         // ### If streaming is not selected
         Response<ChatCompletions> responseWithoutStream = await client.GetChatCompletionsAsync(
@@ -62,21 +64,22 @@ Lunch"),
         var completions = responseWithoutStream.Value;
 
         chatComplete.Messages.Add(completions.Choices[0].Message);
+        myMessages.Add(new MyString { me = data.me, assistant= completions.Choices[0].Message.Content });
+        MyString questionOut = new MyString { me = data.me, assistant= completions.Choices[0].Message.Content };
 
-        MyString questionOut = new MyString { textString = completions.Choices[0].Message.Content };
+
 
         return questionOut;
     }
 
     [HttpGet]
-    public IEnumerable<WeatherForecast> ReturnChat()
+    public List<MyString> ReturnChat()
     {
-        return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-        {
-            Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            TemperatureC = Random.Shared.Next(-20, 55),
-            Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-        })
-        .ToArray();
+        foreach (var message in myMessages) {
+            myMessages.Append(message);
+            Console.WriteLine(message);
+        } 
+
+        return myMessages;
     }
 }

@@ -5,7 +5,14 @@
 }
 
 html {
+  max-height: 100vh;
+}
+
+body {
   font-size: 14px;
+  background-color: #434755;
+  color: 'white';
+  overflow: hidden;
 }
 @media (min-width: 768px) {
   html {

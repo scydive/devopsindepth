@@ -1,6 +1,6 @@
 ﻿namespace devopsindepth;
 
-public class WeatherForecast
+public class WeatherForecasts
 {
     public DateOnly Date { get; set; }
 
