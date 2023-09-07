@@ -1,7 +1,5 @@
 import React, { Component, useState, useEffect, useRef } from "react";
 import { Button, InputGroup } from "reactstrap";
-import { FormControl, FormControlState } from "@mui/base/FormControl";
-import { Input, inputClasses } from "@mui/base/Input";
 import '../custom.css';
 
 interface Chat {
@@ -40,9 +38,6 @@ export const FetchData = () => {
         r.json();
       })
       .then((res) => {
-        if (res) {
-          console.log(res);
-        }
       });
       setSubmitted(true);
 
