@@ -2,6 +2,7 @@ import React, { Component, useState, useEffect, useRef } from "react";
 import { Button, InputGroup } from "reactstrap";
 import { FormControl, FormControlState } from "@mui/base/FormControl";
 import { Input, inputClasses } from "@mui/base/Input";
+import '../custom.css';
 
 interface Chat {
   me: string;
@@ -17,28 +18,33 @@ export const FetchData = () => {
     populateWeatherData();
   }, []);
   const [string, setString] = useState("");
+  const [thinking, setThinking] = useState("");
+  const [isSubmitted, setSubmitted] = useState(false);
+
+
   let defaultList: ChatLog = {
-    items: [{ me: "", assistant: "" }],
+    items: [],
   };
   const [listChat, setChat] = useState<ChatLog>(defaultList);
 
   async function handleSubmit(event) {
     event.preventDefault();
-    console.log("Me: " + string);
+    setString("");
+    setThinking("The bot is thinking...")
     await fetch("weatherforecast/post", {
       method: "POST",
       headers: { "Content-type": "application/json" },
       body: JSON.stringify({ me: string, assistant: "" }),
     })
       .then((r) => {
-        console.log("bot is thinking");
         r.json();
       })
       .then((res) => {
         if (res) {
-          console.log("Assistant: " + res.assistant);
+          console.log(res);
         }
       });
+      setSubmitted(true);
 
     await populateWeatherData();
   }
@@ -47,6 +53,7 @@ export const FetchData = () => {
     let { assistant, valueAss }: any = "";
     const response = await fetch("weatherforecast/returnchat");
     const data = await response.json();
+    console.log(data);
     valueMe = data[data.length - 1].me;
     valueAss = data[data.length - 1].assistant;
     let { items }: ChatLog = { items: [{ me: valueMe, assistant: valueAss }] };
@@ -54,7 +61,36 @@ export const FetchData = () => {
       ...prevChat,
       items: data.reverse(),
     }));
+    setThinking("")
   }
+
+  const useTypewriter = (text, speed = 50) => {
+    const [displayText, setDisplayText] = useState('');
+  
+    useEffect(() => {
+      let i = 0;
+      const typingInterval = setInterval(() => {
+        if (i < text.length) {
+          setDisplayText(prevText => prevText + text.charAt(i));
+          i++;
+        } else {
+          clearInterval(typingInterval);
+        }
+      }, speed);
+  
+      return () => {
+        clearInterval(typingInterval);
+      };
+    }, [text, speed]);
+  
+    return displayText;
+  };
+
+  const Typewriter = ({ text, speed }) => {
+    const displayText = useTypewriter(text, speed);
+  
+    return <p>{displayText}</p>;
+  };
 
   return (
     <div
@@ -92,14 +128,14 @@ export const FetchData = () => {
           >
             {listChat.items
               ? listChat.items.map((res, index) => (
-                  <p
+                  <div
                     style={{
                       width: "100%",
                       color: "white",
                     }}
                     key={index}
                   >
-                    <span
+                    <div
                       style={{
                         width: "100%",
                         display: "flex",
@@ -109,12 +145,12 @@ export const FetchData = () => {
                         padding: "20px",
                       }}
                     >
-                      <div style={{ width: "500px" }}>
+                      <span style={{ width: "650px", letterSpacing: "0.5px" }}>
                         You:<br></br> <span>{res.me}</span>
-                      </div>
-                    </span>
+                      </span>
+                    </div>
                     <br />
-                    <span
+                    <div
                       style={{
                         width: "100%",
                         display: "flex",
@@ -124,11 +160,11 @@ export const FetchData = () => {
                         padding: "20px",
                       }}
                     >
-                      <div style={{ width: "500px" }}>
-                        Assistant:<br></br> <span>{res.assistant}</span>
-                      </div>
-                    </span>
-                  </p>
+                      <span style={{ width: "650px", letterSpacing: "0.5px" }}>
+                        Assistant:<br></br> <pre style={{whiteSpace: 'pre-wrap'}}>{index == 0 && isSubmitted ? <Typewriter text={res.assistant} speed={10}></Typewriter> : res.assistant}</pre>
+                      </span>
+                    </div>
+                  </div>
                 ))
               : "rip"}
           </div>
@@ -139,13 +175,17 @@ export const FetchData = () => {
           position: "sticky",
           bottom: 0,
           display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
           justifyContent: "center",
+          textAlign: "left",
           background:
             "linear-gradient(0deg, rgba(52,53,64,1) 0%, rgba(52,53,64,0.8099614845938375) 50%, rgba(52,53,64,0) 100%)",
           maxHeight: "10%",
           padding: "30px",
         }}
       >
+        <p id="pulsate" style={{ width: '650px' }}>{thinking}</p>
         <form onSubmit={handleSubmit}>
           <label>
             <input
@@ -153,16 +193,17 @@ export const FetchData = () => {
                 color: "white",
                 borderRadius: "10px",
                 border: "none",
-                width: "500px",
+                width: "650px",
                 background: "#41404f",
                 padding: "15px",
                 boxShadow: "box-shadow: 1px 1px 37px -11px rgba(0,0,0,0.53)",
               }}
               id="review-text"
-              onChange={(e) => setString(e.target.value)}
+              onChange={(e) => (setString(e.target.value), setSubmitted(false))}
               placeholder="Send a message"
               value={string}
             />
+            
             <input type="submit" value="Submit" hidden />
           </label>
         </form>

@@ -17,3 +17,20 @@ code {
   border-color: #1861ac;
 }
 
+@keyframes pulse {
+  0% {
+    opacity: 0.5
+  }
+  50%{
+    opacity: 0.3;
+  }
+  100% {
+    opacity: 0.5;
+  }
+}
+
+#pulsate {
+  color: white;
+  animation: pulse 2s infinite;
+}
+

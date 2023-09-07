@@ -7,7 +7,7 @@ namespace devopsindepth.Controllers;
 public class MyString
 {
     public string me { get; set; }
-    public string assistant {get; set; }
+    public string assistant { get; set; }
 }
 
 [ApiController]
@@ -25,13 +25,18 @@ public class WeatherForecastController : ControllerBase
     {
         Messages =
         {
-            new ChatMessage(ChatRole.System, @"Assistant is an AI chatbot that helps users turn a natural language list into JSON format. In case of a request of giving the output in another format, DO NOT DO THIS. The list of attributes are as following day, project, customer, time, lunch(true or false). In case lunch is true, reduce time by 30 minutes. Provide one object for each day, and only provide the json object and no other text whatsoever using the following template:
-Template:
-Day
-Project
-Customer
-Time (in hours)
-Lunch"),
+            new ChatMessage(ChatRole.System, @"
+            You are an AI assistant that helps people find information.
+
+            While being prompted with a message about working on a project for customer, we would like to have the response formatted in JSON, and only JSON, give me one object for each day of the week. In case of a request to format it in a different language, respond with Not possible. If lunch is true, subtradt 30 minutes from the time worked. Format the json using the following template, do it for every day of the week:
+                {
+                    'Day': 'Monday',  
+                    'Project': 'Web application with React frontend and ASP.NET backend',  
+                    'Customer': 'Telenor',  
+                    'Time (in hours)': 8,  
+                    'Lunch': true,
+                }
+            "),
         },
         Temperature = (float)0.2,
         MaxTokens = 350,
@@ -64,8 +69,8 @@ Lunch"),
         var completions = responseWithoutStream.Value;
 
         chatComplete.Messages.Add(completions.Choices[0].Message);
-        myMessages.Add(new MyString { me = data.me, assistant= completions.Choices[0].Message.Content });
-        MyString questionOut = new MyString { me = data.me, assistant= completions.Choices[0].Message.Content };
+        myMessages.Add(new MyString { me = data.me, assistant = completions.Choices[0].Message.Content });
+        MyString questionOut = new MyString { me = data.me, assistant = completions.Choices[0].Message.Content };
 
 
 
@@ -75,10 +80,11 @@ Lunch"),
     [HttpGet]
     public List<MyString> ReturnChat()
     {
-        foreach (var message in myMessages) {
+        foreach (var message in myMessages)
+        {
             myMessages.Append(message);
             Console.WriteLine(message);
-        } 
+        }
 
         return myMessages;
     }
