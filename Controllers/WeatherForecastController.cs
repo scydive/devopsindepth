@@ -33,6 +33,10 @@ public class WeatherForecastController : ControllerBase
     [ActionName("Post")]
     public async Task<MyString> ReturnDataAsync([FromBody] MyString data)
     {
+        var envVars = EnvReader.Load(".env");
+        var connectionString = Environment.GetEnvironmentVariable("AZURE_OPENAI_URI");
+        var apiKey = Environment.GetEnvironmentVariable("AZURE_KEY_CREDENTIAL");
+
         ChatCompletionsOptions chatComplete = new ChatCompletionsOptions
         {
             Messages =
@@ -46,8 +50,8 @@ public class WeatherForecastController : ControllerBase
             PresencePenalty = 0,
         };
         OpenAIClient client = new OpenAIClient(
-        new Uri("https://gpt-devlin.openai.azure.com/"),
-        new AzureKeyCredential("f501038bd9334d15941f1c224c39514a"));
+        new Uri(connectionString),
+        new AzureKeyCredential(apiKey));
 
         chatComplete.Messages.Add(new ChatMessage(ChatRole.User, data.me));
 
